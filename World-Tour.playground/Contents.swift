@@ -33,7 +33,7 @@ class WorldScene: SCNScene  {
         setupCamera()
         setupSun()
         setupCloudsAndHalo()
-        
+        setupStars()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -120,6 +120,15 @@ class WorldScene: SCNScene  {
         earthNode.addChildNode(cloudsNode)
     }
     
+    func setupStars() {
+        
+        if let starSystem = SCNParticleSystem(named: "StarParticleSystem.scnp", inDirectory: nil) {
+            self.rootNode.addParticleSystem(starSystem)
+        } else {
+            print("Couldn't add star system")
+        }
+    }
+    
     // Leftwards continuous revolving animation
     func revolve(node: SCNNode, value: CGFloat, increase: CGFloat) -> CGFloat {
         var rotation = value
@@ -137,7 +146,7 @@ class WorldScene: SCNScene  {
 
 class WorldView: SCNView {
     
-     let worldScene = WorldScene()
+    let worldScene = WorldScene()
     
     override init(frame: NSRect, options: [String : Any]? = nil) {
         super.init(frame: frame, options: options)
@@ -159,6 +168,8 @@ class WorldView: SCNView {
 
 
 // Instantiate iPad resolution proportionate view
-PlaygroundPage.current.liveView = WorldView(frame:
-    NSRect(x: 0, y: 0, width: 512, height: 384))
+//PlaygroundPage.current.liveView = WorldView(frame:
+//    NSRect(x: 0, y: 0, width: 512, height: 384))
 
+PlaygroundPage.current.liveView = WorldView(frame:
+    NSRect(x: 0, y: 0, width: 1024, height: 768))
