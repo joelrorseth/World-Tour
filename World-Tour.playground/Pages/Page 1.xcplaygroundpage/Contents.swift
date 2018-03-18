@@ -6,10 +6,13 @@
 //
 
 import Cocoa
-import SceneKit
 import CoreLocation
 import GLKit
 import PlaygroundSupport
+import ModelIO
+import SceneKit.ModelIO
+import SceneKit
+
 
 
 class WorldScene: SCNScene  {
@@ -34,6 +37,12 @@ class WorldScene: SCNScene  {
         setupSun()
         setupCloudsAndHalo()
         setupStars()
+        
+        // Instantiate a thumbtack
+        
+        let tn = ThumbtackNode()
+        tn.setup()
+        rootNode.addChildNode(tn)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -168,8 +177,8 @@ class WorldView: SCNView {
 
 
 // Instantiate iPad resolution proportionate view
-//PlaygroundPage.current.liveView = WorldView(frame:
-//    NSRect(x: 0, y: 0, width: 512, height: 384))
-
 PlaygroundPage.current.liveView = WorldView(frame:
-    NSRect(x: 0, y: 0, width: 1024, height: 768))
+    NSRect(x: 0, y: 0, width: 512, height: 384))
+
+//PlaygroundPage.current.liveView = WorldView(frame:
+//    NSRect(x: 0, y: 0, width: 1024, height: 768))
