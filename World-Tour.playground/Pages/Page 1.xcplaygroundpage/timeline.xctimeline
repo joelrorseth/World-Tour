@@ -2,5 +2,10 @@
 <Timeline
    version = "3.0">
    <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Joel/Documents/Software%20Projects/World-Tour/World-Tour.playground/Pages/Page%201.xcplaygroundpage#CharacterRangeLen=1&amp;CharacterRangeLoc=748&amp;EndingColumnNumber=0&amp;EndingLineNumber=33&amp;StartingColumnNumber=1&amp;StartingLineNumber=32&amp;Timestamp=543098169.2727309"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
    </TimelineItems>
 </Timeline>

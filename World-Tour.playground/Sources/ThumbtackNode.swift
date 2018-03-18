@@ -4,6 +4,8 @@ public class ThumbtackNode: SCNNode {
     
     public override init() {
         super.init()
+        
+        setup()
     }
     
     public required init?(coder aDecoder: NSCoder) {
