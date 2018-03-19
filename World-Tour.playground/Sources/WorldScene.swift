@@ -9,10 +9,7 @@ public class WorldScene: SCNScene {
     let sunNode = SCNNode()
     let cloudsNode = SCNNode()
     
-    let sunNodeRotationSpeed: CGFloat  = CGFloat(Double.pi/6)
-    let earthNodeRotationSpeed: CGFloat = CGFloat(Double.pi/40)
-    var earthNodeRotation: CGFloat = 0
-    var sunNodeRotation = Float(Double.pi/2)
+    var sunNodeRotation = Float(Double.pi / 2)
     
     
     public override init() {
@@ -21,18 +18,19 @@ public class WorldScene: SCNScene {
         setupEarth()
         setupCamera()
         setupSun()
-        
         setupStars()
-        
-        // Instantiate a thumbtack
-        
-        let tn = ThumbtackNode()
-        //tn.setup()
-        rootNode.addChildNode(tn)
     }
     
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // Convenience function to spawn a ThumbtackNode at a position in world space
+    public func spawnThumbtackAt(_ position: SCNVector3) {
+    
+        let tack = ThumbtackNode()
+        tack.position = position
+        rootNode.addChildNode(tack)
     }
     
     func setupEarth() {
@@ -62,14 +60,9 @@ public class WorldScene: SCNScene {
         sunNode.light = light
         
         // Sun is rotated out of view
-        //sunNode.rotation = SCNVector4(x: 0.0, y: 1.0, z: 0.0, w: CGFloat(sunNodeRotation))
-        
         sunNode.rotation = SCNVector4Make(0.0, 1.0, 0.0, sunNodeRotation)
         rootNode.addChildNode(sunNode)
     }
-    
-    
-    
     
     func setupStars() {
         
@@ -79,18 +72,5 @@ public class WorldScene: SCNScene {
             print("Couldn't add star system")
         }
     }
-    
-    // Leftwards continuous revolving animation
-    //    func revolve(node: SCNNode, value: CGFloat, increase: CGFloat) -> CGFloat {
-    //        var rotation = value
-    //
-    //        if value < CGFloat(-Double.pi * 2) {
-    //
-    //            rotation = value + CGFloat(Double.pi*2)
-    //            node.rotation = SCNVector4(x: 0.0, y: 1.0, z: 0.0, w: rotation)
-    //        }
-    //
-    //        return rotation - increase
-    //    }
 }
 

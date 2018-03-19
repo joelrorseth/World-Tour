@@ -19,12 +19,6 @@ public class ThumbtackNode: SCNNode {
             
             // Add each component (as a node) of the scene containing the object
             for node in assetScene.rootNode.childNodes {
-
-                // Temporarily add translation
-                node.position = SCNVector3Make(
-                    node.position.x,
-                    node.position.y + 5,
-                    node.position.z)
                 
                 self.addChildNode(node)
             }
