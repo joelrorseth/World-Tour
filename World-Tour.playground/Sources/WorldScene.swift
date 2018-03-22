@@ -26,10 +26,14 @@ public class WorldScene: SCNScene {
     }
     
     // Convenience function to spawn a ThumbtackNode at a position in world space
-    public func spawnThumbtackAt(_ position: SCNVector3) {
+    public func spawnThumbtackAt(position: SCNVector3, rotation: SCNVector3) {
     
         let tack = ThumbtackNode()
         tack.position = position
+
+        print(position)
+        print(rotation)
+        print("  ")
         rootNode.addChildNode(tack)
     }
     
