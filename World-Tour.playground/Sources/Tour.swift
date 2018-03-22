@@ -6,6 +6,7 @@ public struct Tour: Comparable {
     var cities = [City]()
     
     
+    // The distance travelled by the salesman to visit all cities in this Tour sequence
     var totalDistance: Double {
         
         if cities.isEmpty { return 0.0 }
@@ -22,7 +23,19 @@ public struct Tour: Comparable {
         return distance
     }
     
-    public init(start: City, cities: [City]) {
+    // The fitness of a genetic sequence is determined by some heuristic
+    // For our purposes, fitness is more optimal as total distance approaches 0
+    var fitness: Double {
+        
+        // Here the range of fitness is [0,1]
+        return totalDistance != 0.0 ?
+            (1.0 / totalDistance) : 0.0
+    }
+    
+    
+    // Initializer defines the sequence of cities (the tour)
+    // The passed City ordering can be preserved, or randomized to generate a permuted Tour
+    public init(start: City, cities: [City], random: Bool = false) {
         self.startCity = start
         self.cities = cities
     }
