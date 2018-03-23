@@ -25,4 +25,16 @@ public class Population {
             tours.append(Tour(start: start, cities: cities, random: true))
         }
     }
+    
+    public func rankToursByFitness() -> [Double] {
+        
+        // Sort the Tour objects of the current population by decreasing fitness
+        tours.sort(by: { $0.fitness > $1.fitness })
+        
+        let sumFitness: Double = sumFitnessAllTours / Double(tours.count)
+        
+        // Return array of propabilities (based on fitness) of selecting a Tour at a given index
+        // The fitnesses are use to weight the probability for a Tour at given index vs others
+        return tours.map({ $0.fitness / sumFitness })
+    }
 }
