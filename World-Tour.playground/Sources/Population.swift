@@ -17,6 +17,13 @@ public class Population {
         generateTours(size: size, start: startCity, cities: cities)
     }
     
+    // Custom initializer directly sets the generation of the population with new Tour objects
+    // Use this initializer to replace the population with new generation of better Tours
+    public init(tours: [Tour]) {
+        
+        self.tours = tours
+    }
+    
     // Generate a population of random genetic sequences (Tours)
     public func generateTours(size: UInt, start: City, cities: [City]) {
         
