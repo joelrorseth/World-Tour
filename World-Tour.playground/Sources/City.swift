@@ -2,9 +2,9 @@ import Foundation
 
 public struct City : Equatable, Codable {
     
-    let name: String!
-    let latitude: Double!
-    let longitude: Double!
+    public let name: String!
+    public let latitude: Double!
+    public let longitude: Double!
     
     //let location: (x: Double, y: Double)!
     

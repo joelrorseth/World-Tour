@@ -55,16 +55,20 @@ public class TempScene: SCNScene {
     public override init() {
         super.init()
         
-        // Test space for the genetic algorithm
         var cities = CityFactory.createCitiesFromJSON()
         
         let startCity = cities.first!
-        cities = Array(cities[1...])
+        cities = Array(cities[1...50])
         
-        let algo = GeneticAlgorithm(populationSize: cities.count, mutationRate: 0.3,
+        let algo = GeneticAlgorithm(populationSize: cities.count, mutationRate: 3,
                                     startCity: startCity, cities: cities)
         
-        algo.simulateNGenerations(n: 10)
+        // Print results of genetic simulation
+        if let bestSequence = algo.simulateNGenerations(n: 300) {
+            for city in bestSequence.cities {
+                print(city.name, terminator: "->")
+            }
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
