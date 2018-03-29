@@ -47,6 +47,31 @@ public class WorldScene: SCNScene {
         
         // Add marker as a child of the earth node
         earthNode.addChildNode(node)
+        drawArc(position: position)
+    }
+    
+    public func drawArc(position: SCNVector3) {
+    
+        // Define a 2D path for the parabola
+        let path = UIBezierPath()
+        path.move(to: CGPoint.zero)
+        path.addQuadCurve(to: CGPoint(x: 100, y: 0), controlPoint: CGPoint(x: 50, y: 200))
+        path.addLine(to: CGPoint(x: 99, y: 0))
+        path.addQuadCurve(to: CGPoint(x: 1, y: 0), controlPoint: CGPoint(x: 50, y: 198))
+        
+        // Tweak for a smoother shape (lower is smoother)
+        path.flatness = 0.25
+        
+        // Make a 3D extruded shape from the path
+        let shape = SCNShape(path: path, extrusionDepth: 2)
+        shape.firstMaterial?.diffuse.contents = UIColor.blue
+        
+        // And place it in the scene
+        let shapeNode = SCNNode(geometry: shape)
+        shapeNode.pivot = SCNMatrix4MakeTranslation(50, 0, 0)
+        shapeNode.eulerAngles.y = Float(Double.pi / 4)
+        shapeNode.position = position
+        rootNode.addChildNode(shapeNode)
     }
     
     

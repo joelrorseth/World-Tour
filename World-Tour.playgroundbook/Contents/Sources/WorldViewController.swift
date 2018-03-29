@@ -30,11 +30,18 @@ public class WorldViewController: UIViewController {
             if let hit = worldView.hitTest(touch.location(in: worldView), options: nil).first {
                 
                 // Obtain the (world space) intersection point of casted ray and (Earth) node
-                let intersectionCoord = hit.worldCoordinates
+                let intersectionCoord = hit.localCoordinates
+                let intersectionNormal = hit.localNormal
+                
+//                print("World POI:    \(hit.worldCoordinates)")
+//                print("World Normal: \(hit.worldNormal)")
+//                print("POI node:     \(hit.node)")
+                
                 
                 // Spawn a thumbtack here
                 // TODO: Account for thumbtack angle, should be normal to the POI on Earth
-                worldView.worldScene.spawnThumbtackAt(intersectionCoord)
+                worldView.worldScene.spawnThumbtackAt(position: intersectionCoord,
+                                                      rotation: intersectionNormal)
             
             } else { print("Error: hitTest() has no first SCNHitTestResult") }
         } else { print("Error: touchesBegan() has no UITouch objects") }

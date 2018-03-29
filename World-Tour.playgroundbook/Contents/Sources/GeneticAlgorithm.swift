@@ -4,44 +4,27 @@ public class GeneticAlgorithm {
     
     var population: Population!
     var startCity: City!
-    var populationSize: Int = 0
+    var populationSize: UInt = 0
     var tourSize: Int = 0
     var mutationRate = 0.5
     
-    public init(populationSize: Int, mutationRate: Double, startCity: City, cities: [City]) {
+    public init(populationSize: UInt, mutationRate: Double, startCity: City, cities: [City]) {
         
         // Generate a single population for the genetic algorithm to evolve
         population = Population(size: populationSize,
             startCity: startCity, cities: cities)
         
-        self.startCity = startCity
         self.populationSize = populationSize
         self.tourSize = cities.count
         self.mutationRate = mutationRate
     }
     
-    /*
- 
-     for tour in newTours {
-     if Set(tour.cities).count != 8 {
-     print(tour.cities)
-     }
-     }
-     
- */
-    
     public func simulateNGenerations(n: Int) {
         
-        print("Starting fitness:")
-        bestTourInCurrentPopulation()
-        
-        print(" ")
-        
-        for i in 0 ..< n {
+        for _ in 0 ..< n {
             
             // Get new pairs for CURRENT population using the selection algorithm
             let newSelectionPairs = selection()
-
             
             // Perform crossover to obtain next generation of Tour objects (in next population)
             var newTours = crossover(pairs: newSelectionPairs)
@@ -53,27 +36,6 @@ public class GeneticAlgorithm {
             
             // Reset population to be the next generation
             self.population = Population(tours: newTours)
-            bestTourScore(genNumber: i)
-        
-        }
-        
-        bestTourInCurrentPopulation()
-    }
-    
-    public func bestTourScore(genNumber: Int) {
-        
-        if let fittest = population.getFittest() {
-            
-            print("Generation \(genNumber) score: \(fittest.totalDistance)")
-        }
-    }
-    
-    public func bestTourInCurrentPopulation() {
-        
-        if let fittest = population.getFittest() {
-            
-            print(fittest.totalDistance)
-            for city in fittest.cities { print(city.name) }
         }
     }
     
@@ -101,7 +63,6 @@ public class GeneticAlgorithm {
             ))
         }
         
-
         return newGenerationPairs
     }
     
@@ -151,58 +112,15 @@ public class GeneticAlgorithm {
         
         for (t1, t2) in pairs {
             
-//            print("===\nParent 1:", terminator: " ")
-//            for c in t1.cities { print(c.name, terminator: " ") }
-//            print("\nParent 2:", terminator: " ")
-//            for c in t1.cities { print(c.name, terminator: " ") }
-//            print("")
+            // Determine a random crossover point
+            let crossoverIndex: Int = Int(arc4random_uniform(UInt32(tourSize)))
             
-            let n1 = Int(arc4random_uniform(UInt32(tourSize - 1)))
-            let n2 = Int(arc4random_uniform(UInt32(tourSize)))
+            // Swap the Tour cities of the two Tours at all indices before the crossover point
+            let newCities1 = Array(t1.cities[..<crossoverIndex] + t2.cities[crossoverIndex...])
+            let newCities2 = Array(t2.cities[..<crossoverIndex] + t1.cities[crossoverIndex...])
             
-            let start = min(n1, n2)
-            let end = max(n1, n2)
-            
-            var c1 = Array(t1.cities[start..<end])
-            var c2 = Array(t2.cities[start..<end])
-            
-            var currentCityIndex = 0
-            var currentCityInT1 = City(name: "", lat: -1, lng: -1)
-            var currentCityInT2 = City(name: "", lat: -1, lng: -1)
-            
-            for i in 0..<tourSize {
-                
-                currentCityIndex = (end + i) % tourSize
-                
-                // get the city at the current index in each of the two parent tours
-                currentCityInT1 = t1.cities[currentCityIndex]
-                currentCityInT2 = t2.cities[currentCityIndex]
-                
-                
-                // if child 1 does not already contain the current city in tour 2, add it
-                if (!c1.contains(currentCityInT2)) {
-                    c1.append(currentCityInT2)
-                }
-                
-                // if child 2 does not already contain the current city in tour 1, add it
-                if (!c2.contains(currentCityInT1)) {
-                    c2.append(currentCityInT1)
-                }
-            }
-
-            // rotate the lists so the original slice is in the same place as in the
-            c1.shiftRightInPlace(amount: start)
-            c2.shiftRightInPlace(amount: start)
-            
-//            print("Child 1:", terminator: " ")
-//            for c in c1 { print(c.name, terminator: " ") }
-//            print("\nChild 2:", terminator: " ")
-//            for c in c2 { print(c.name, terminator: " ") }
-//            print("\n====")
-            
-            // copy the tours from the children back into the parents
-            newTours.append(Tour(start: startCity, cities: c1))
-            newTours.append(Tour(start: startCity, cities: c2))
+            newTours.append(Tour(start: startCity, cities: newCities1))
+            newTours.append(Tour(start: startCity, cities: newCities2))
         }
         
         return newTours
@@ -229,16 +147,6 @@ public class GeneticAlgorithm {
                 tour.cities[j] = temp
             }
         }
-    }
-}
-
-extension Array {
-    func shiftRight(amount: Int) -> [Element] {
-        //return Array(self[amount ..< self.count] + self[0 ..< amount])
-        return Array(self[(self.count - amount) ..< self.count] + self[0 ..< (self.count - amount)])
-    }
-    
-    mutating func shiftRightInPlace(amount: Int) {
-        self = shiftRight(amount: amount)
+        
     }
 }
