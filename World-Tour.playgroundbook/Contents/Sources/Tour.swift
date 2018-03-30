@@ -3,7 +3,7 @@ import Foundation
 public struct Tour: Comparable {
     
     var startCity: City!
-    var cities = [City]()
+    public var cities = [City]()
     
     
     // The distance travelled by the salesman to visit all cities in this Tour sequence
@@ -28,8 +28,14 @@ public struct Tour: Comparable {
     var fitness: Double {
         
         // Here the range of fitness is [0,1]
-        return totalDistance != 0.0 ?
-            (1.0 / totalDistance) : 0.0
+        return totalDistance != 0.0 ? (1.0 / totalDistance) : 0.0
+    }
+    
+    // Tour is fit if it has short distance compared to others in population
+    public func fitness(withPopulationDistance populationDistance: Double) -> Double {
+        
+        // Return a fitness in [0,1]
+        return 1 - (self.totalDistance / populationDistance)
     }
     
     

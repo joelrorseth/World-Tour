@@ -12,7 +12,7 @@ public class Population {
     
     
     // Default initialization generates random population (random Tour sequences)
-    public init(size: UInt, startCity: City, cities: [City]) {
+    public init(size: Int, startCity: City, cities: [City]) {
         
         generateTours(size: size, start: startCity, cities: cities)
     }
@@ -25,10 +25,14 @@ public class Population {
     }
     
     // Generate a population of random genetic sequences (Tours)
-    public func generateTours(size: UInt, start: City, cities: [City]) {
+    public func generateTours(size: Int, start: City, cities: [City]) {
         
+        var cities = cities
         // Generate 'size' random city sequences to populate the population
         for _ in 0 ..< size {
+            
+            // Shuffle city sequence to create a new tour for initial population
+            cities.shuffle()
             tours.append(Tour(start: start, cities: cities, random: true))
         }
     }
@@ -43,5 +47,18 @@ public class Population {
         // Return array of propabilities (based on fitness) of selecting a Tour at a given index
         // The fitnesses are use to weight the probability for a Tour at given index vs others
         return tours.map({ $0.fitness / sumFitness })
+    }
+    
+    public func getFittest() -> Tour? {
+        
+        tours.sort(by: { $0.fitness > $1.fitness })
+        return tours.first
+    }
+    
+    // Determine sum of all tour distances
+    public func totalDistanceOverAllTours() -> Double {
+        
+        // Sum the total distance of each Tour in the population
+        return tours.reduce(0.0, { $0 + $1.totalDistance })
     }
 }

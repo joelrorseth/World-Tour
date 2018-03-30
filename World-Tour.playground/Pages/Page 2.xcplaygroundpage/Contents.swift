@@ -8,6 +8,7 @@
 import PlaygroundSupport
 import UIKit
 import SceneKit
+import MapKit
 
 public class TempView: SCNView {
     
@@ -29,11 +30,12 @@ public class TempView: SCNView {
     }
 }
 
-public class TempController: UIViewController {
+public class TempController: UIViewController, MKMapViewDelegate {
     
     // Encapsulate a single WorldView inside this controller
     var worldView: TempView!
-    
+    var mapView: MKMapView!
+    var tileRenderer: MKTileOverlayRenderer!
     
     // Standard initializer
     public init () {
@@ -42,7 +44,7 @@ public class TempController: UIViewController {
         // Instantiate the WorldView
         // TODO: Shouldn't be hardcoding dimensions here
         worldView = TempView(frame: CGRect(x: 0, y: 0, width: 512, height: 384))
-        self.view = worldView
+        //self.view = worldView
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -51,18 +53,18 @@ public class TempController: UIViewController {
 }
 
 public class TempScene: SCNScene {
-    
+
     public override init() {
         super.init()
-        
+
         var cities = CityFactory.createCitiesFromJSON()
-        
+
         let startCity = cities.first!
         cities = Array(cities[1...50])
-        
+
         let algo = GeneticAlgorithm(populationSize: cities.count, mutationRate: 3,
                                     startCity: startCity, cities: cities)
-        
+
         // Print results of genetic simulation
         if let bestSequence = algo.simulateNGenerations(n: 300) {
             for city in bestSequence.cities {
@@ -70,7 +72,7 @@ public class TempScene: SCNScene {
             }
         }
     }
-    
+
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
