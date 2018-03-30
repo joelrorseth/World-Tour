@@ -7,8 +7,7 @@ public class MapScene: SKScene {
     var markerNodes: [SKNode] = []
     
     
-    // =====================================
-    // =====================================
+    // MARK: View Lifecycle
     override public func didMove(to view: SKView) {
         
         self.isUserInteractionEnabled = true
@@ -32,7 +31,72 @@ public class MapScene: SKScene {
         let pinchGesture = UIPinchGestureRecognizer(
             target: self, action: #selector(self.handlePinch(_:)))
         self.view?.addGestureRecognizer(pinchGesture)
+        
+        setupToolbar(view: view)
     }
+    
+    
+    // MARK: Toolbar
+    // Estblish a toolbar to control the simulation
+    private func setupToolbar(view: SKView) {
+        
+        // Define UIToolbar at top of screen
+        let toolbar = UIToolbar(frame:
+            CGRect(x: 0, y: 0, width: frame.size.width, height: 44))
+        
+        // Add buttons to start / stop the simulation
+        let startItem = UIBarButtonItem(title: "Start",
+            style: UIBarButtonItemStyle.plain, target: self,
+            action: #selector(toolbarButtonClicked))
+        
+        let stopItem = UIBarButtonItem(title: "Stop",
+            style: UIBarButtonItemStyle.plain, target: self,
+            action: #selector(toolbarButtonClicked))
+        
+        // Add text view to show the distance of the current path
+        let textView = UITextView(frame:
+            CGRect(x: 0, y: 0, width: frame.size.width/3, height: 44))
+        
+        textView.backgroundColor = UIColor.clear
+        textView.text = "0 km"
+        textView.contentInset = UIEdgeInsetsMake(4.0, 0, 0, 0)
+        textView.textAlignment = NSTextAlignment.center
+        textView.font = UIFont.boldSystemFont(ofSize: 17)
+        textView.isEditable = false
+        
+        let distanceItem = UIBarButtonItem(customView: textView)
+        
+        // Use flexible space item to center the distance text view
+        let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+            target: nil, action: nil)
+        
+        toolbar.setItems([startItem, spacer, distanceItem, spacer, stopItem], animated: true)
+        view.addSubview(toolbar)
+    }
+    
+    // Handler for bar button item selection within the toolbar
+    @objc public func toolbarButtonClicked(sender: UIBarButtonItem) {
+        guard let title = sender.title else { return }
+        
+        switch (title) {
+            
+        case "Start":
+            startGeneticAlgorithm()
+            break
+            
+        case "Stop":
+            stopGeneticAlgorithm()
+            break
+            
+        default:
+            break
+        }
+    }
+    
+    
+    // MARK: Simulation Control
+    public func startGeneticAlgorithm() { print("Start") }
+    public func stopGeneticAlgorithm() { print("Stop") }
     
     
     // MARK: Touch Events
