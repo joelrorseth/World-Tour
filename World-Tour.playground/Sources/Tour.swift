@@ -70,7 +70,7 @@ extension Tour: CustomStringConvertible {
     public var description: String {
         
         // Start city to first in city sequence
-        var str = startCity.name + "->"
+        var str = startCity.name + " -> "
         
         // Cities in between
         for city in self.cities {
@@ -78,6 +78,6 @@ extension Tour: CustomStringConvertible {
         }
         
         // Last city back to start
-        return str + "->" + startCity.name
+        return str + startCity.name
     }
 }

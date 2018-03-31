@@ -13,6 +13,7 @@ public class PnPGeneticAlgorithm {
     // Functions defined elsewhere
     var selection: ((Population, Double) -> Tour)
     var crossover: ((Tour, Tour) -> Tour)
+    var mutation: ((Tour, Double) -> Tour)
     
     // A delegate will recieve simulation updates in real-time
     public var simulationDelegate: SimulationDelegate?
@@ -28,6 +29,7 @@ public class PnPGeneticAlgorithm {
         
         self.selection = parameters.selection
         self.crossover = parameters.crossover
+        self.mutation = parameters.mutation
         
         // Generate a single population for the genetic algorithm to evolve
         currentPopulation = Population(size: parameters.populationSize,
@@ -59,13 +61,13 @@ public class PnPGeneticAlgorithm {
                 
                 // Parents produce a single offspring
                 // This PnP function is also defined in playground
-                var childTour = crossover(parentOne, parentTwo)
+                let childTour = crossover(parentOne, parentTwo)
 
                 // Randomly apply a mutation to the new Tour
-                mutate(tour: &childTour)
+                let newChild = mutation(childTour, mutationRate)
 
                 // Add tour to next generation
-                nextGeneration.append(childTour)
+                nextGeneration.append(newChild)
             }
             
             // Establish new population / generation of Tours
@@ -82,26 +84,7 @@ public class PnPGeneticAlgorithm {
 
         return currentPopulation.getFittest()?.totalDistance
     }
-    
-    
-    // Mutation function will randomly apply a single mutation
-    // In travelling salesman, this means we randomly swap position of two cities in Tour
-    private func mutate(tour: inout Tour) {
-        
-        // Generate random number [0,100)
-        let rate = Double(arc4random_uniform(101)) / 100.0
-        
-        // With probability = mutationRate, swap the city at index i with a random index j
-        if (rate < mutationRate) {
-            
-            // Get another random position to swap City objects
-            let i: Int = Int(arc4random_uniform(UInt32(tourSize)))
-            let j: Int = Int(arc4random_uniform(UInt32(tourSize)))
-            
-            // Perform the random mutation by swapping the cities
-            tour.cities.swapAt(i, j)
-        }
-    }
+
     
     // Issue updates regarding the new generation
     public func reportNewGeneration(generation: Int) {

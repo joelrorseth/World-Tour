@@ -14,7 +14,7 @@ class SequenceViewController: UIViewController {
         textView.contentInset = UIEdgeInsetsMake(4, 4, 4, 4)
         textView.text = "\(tour)"
         textView.isEditable = false
-        textView.font = UIFont.boldSystemFont(ofSize: 17)
+        textView.font = UIFont.systemFont(ofSize: 17)
         textView.isScrollEnabled = true
         
         super.init(nibName: nil, bundle: nil)

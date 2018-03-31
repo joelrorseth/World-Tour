@@ -37,7 +37,7 @@ public class GeneticAlgorithm {
             
             var nextGeneration = [Tour]()
 
-            for p in 0..<populationSize {
+            for _ in 0..<populationSize {
                 
                 // Obtain total distance over all tours in population -- total population distance
                 let populationTotalDistance = currentPopulation.totalDistanceOverAllTours()
