@@ -5,7 +5,8 @@ public class MapScene: SKScene {
     var background: SKSpriteNode!
     var cam: SKCameraNode!
     var markerNodes: [SKNode] = []
-    
+    var pathNodes: [SKNode] = []
+    var distanceTextView: UITextView!
     
     // MARK: View Lifecycle
     override public func didMove(to view: SKView) {
@@ -13,7 +14,7 @@ public class MapScene: SKScene {
         self.isUserInteractionEnabled = true
         
         // Add the map, our background, as a node
-        background = SKSpriteNode(imageNamed: "canada.jpg")
+        background = SKSpriteNode(imageNamed: "canada.png")
         background.position = CGPoint(x: frame.midX, y: frame.midY)
         background.isUserInteractionEnabled = false
         addChild(background)
@@ -49,22 +50,22 @@ public class MapScene: SKScene {
             style: UIBarButtonItemStyle.plain, target: self,
             action: #selector(toolbarButtonClicked))
         
-        let stopItem = UIBarButtonItem(title: "Stop",
+        let stopItem = UIBarButtonItem(title: "Reset",
             style: UIBarButtonItemStyle.plain, target: self,
             action: #selector(toolbarButtonClicked))
         
         // Add text view to show the distance of the current path
-        let textView = UITextView(frame:
-            CGRect(x: 0, y: 0, width: frame.size.width/3, height: 44))
+        distanceTextView = UITextView(frame:
+            CGRect(x: 0, y: 0, width: frame.size.width/2, height: 44))
         
-        textView.backgroundColor = UIColor.clear
-        textView.text = "0 km"
-        textView.contentInset = UIEdgeInsetsMake(4.0, 0, 0, 0)
-        textView.textAlignment = NSTextAlignment.center
-        textView.font = UIFont.boldSystemFont(ofSize: 17)
-        textView.isEditable = false
+        distanceTextView.backgroundColor = UIColor.clear
+        distanceTextView.text = ""
+        distanceTextView.contentInset = UIEdgeInsetsMake(4.0, 0, 0, 0)
+        distanceTextView.textAlignment = NSTextAlignment.center
+        distanceTextView.font = UIFont.boldSystemFont(ofSize: 17)
+        distanceTextView.isEditable = false
         
-        let distanceItem = UIBarButtonItem(customView: textView)
+        let distanceItem = UIBarButtonItem(customView: distanceTextView)
         
         // Use flexible space item to center the distance text view
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
@@ -84,8 +85,8 @@ public class MapScene: SKScene {
             startGeneticAlgorithm()
             break
             
-        case "Stop":
-            stopGeneticAlgorithm()
+        case "Reset":
+            resetGeneticAlgorithm()
             break
             
         default:
@@ -95,8 +96,48 @@ public class MapScene: SKScene {
     
     
     // MARK: Simulation Control
-    public func startGeneticAlgorithm() { print("Start") }
-    public func stopGeneticAlgorithm() { print("Stop") }
+    public func startGeneticAlgorithm() {
+        
+        if markerNodes.count <= 2 { return }
+        distanceTextView.text = "Running..."
+        
+        //var cities = CityFactory.createCitiesFromJSON()
+        var cities = CityFactory.createCitiesFromNodes(
+            nodes: markerNodes, parent: background)
+        
+        let startCity = cities.first!
+        cities = Array(cities[1...])
+        
+        // Create genetic algorithm instance with parameters
+        let algo = GeneticAlgorithm(populationSize: 100, mutationRate: 1.5,
+                                    startCity: startCity, cities: cities)
+        algo.simulationDelegate = self
+        
+        DispatchQueue.global(qos: .background).async {
+            print("Scene has called GA on background thread")
+            
+            // Print results of genetic simulation
+            let bestSequence = algo.simulateNGenerations(n: 50)
+            
+            DispatchQueue.main.async {
+                print("Scene main queue is processing the results")
+                
+                guard let sequence = bestSequence else { return }
+                for city in sequence.cities {
+                    print(city.name, terminator: "->")
+                }
+            }
+        }
+    }
+    
+    public func resetGeneticAlgorithm() {
+        
+        background.removeAllChildren()
+        markerNodes.removeAll()
+        pathNodes.removeAll()
+        
+        distanceTextView.text = ""
+    }
     
     
     // MARK: Touch Events
@@ -141,11 +182,23 @@ public class MapScene: SKScene {
         self.background.addChild(marker)
     }
     
-    // Render a path (node) between two points in the scene
-    public func drawPath(from pointA: CGPoint, to pointB: CGPoint, width: CGFloat) {
+    // Draw a path between two cities (coordinates relative to parent node)
+    public func drawPathBetween(cityA: City, cityB: City, color: UIColor) {
+        
+        let ptA = CGPoint(x: cityA.latitude, y: cityA.longitude)
+        let ptB = CGPoint(x: cityB.latitude, y: cityB.longitude)
+        
+        // Draw a path between the x,y world / scene position of both cities
+//        drawPath(from: convert(ptA, from: background),
+//                 to: convert(ptB, from: background), color: color)
+        
+        drawPath(from: ptA, to: ptB, color: color)
+    }
+    
+    // Render a path (node) between two points in the scene, relative to background node
+    public func drawPath(from pointA: CGPoint, to pointB: CGPoint, color: UIColor) {
         
         // TODO
-        
         let edgePath  = CGMutablePath()
         edgePath.move(to: CGPoint(x: pointA.x, y: pointA.y))
         edgePath.addLine(to: CGPoint(x: pointB.x, y: pointB.y))
@@ -153,10 +206,65 @@ public class MapScene: SKScene {
         // Create a SKShapeNode to represent the edge as a straight line
         let shape = SKShapeNode()
         shape.path = edgePath
-        shape.strokeColor = SKColor.black
-        shape.lineWidth = width
+        shape.strokeColor = .red
+        shape.lineWidth = 8.0
         shape.zPosition = 4
+        shape.isHidden = true
         
-        addChild(shape)
+        pathNodes.append(shape)
+        background.addChild(shape)
+    }
+}
+
+
+extension MapScene: SimulationDelegate {
+    
+    public func yieldNewGeneration(fittest: Tour) {
+        
+        pathNodes.removeAll()
+        
+        
+        drawPathBetween(cityA: fittest.startCity,
+                        cityB: fittest.cities.first!,
+                        color: UIColor(red: 0, green: 0, blue: 0.3, alpha: 1))
+        
+        let numPaths = fittest.cities.count - 1
+        
+        // Draw the sequence of cities defined by this Tour
+        for i in 0..<numPaths {
+            
+            let color = UIColor(
+                red: CGFloat(Double(i)/Double(numPaths)),
+                green: 0,
+                blue: 0.3,
+                alpha: 1.0)
+            
+            UIView.animate(withDuration: 5) {
+                
+                self.drawPathBetween(cityA: fittest.cities[i],
+                            cityB: fittest.cities[i+1],
+                            color: color)
+            }
+        }
+        
+        // Draw path between start city -> first city, last city -> start city
+        drawPathBetween(cityA: fittest.cities.last!,
+                        cityB: fittest.startCity,
+                        color: UIColor(red: 1, green: 0, blue: 0.3, alpha: 1))
+        
+        distanceTextView.text = "\(Int(fittest.totalDistance)) km"
+        animateNodes(pathNodes)
+    }
+    
+    public func animateNodes(_ nodes: [SKNode]) {
+        for (index, node) in nodes.enumerated() {
+            node.run(.sequence([
+                .wait(forDuration: TimeInterval(index) * 0.2),
+                .repeat(.sequence([
+                    .unhide(),
+                    .wait(forDuration: 2)
+                    ]), count: 1)
+                ]))
+        }
     }
 }

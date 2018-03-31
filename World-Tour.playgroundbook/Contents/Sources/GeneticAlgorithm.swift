@@ -4,9 +4,12 @@ public class GeneticAlgorithm {
     
     var currentPopulation: Population!
     var startCity: City!
-    var populationSize: Int = 0
-    var tourSize: Int = 0
-    var mutationRate = 1.53
+    var populationSize: Int!
+    var tourSize: Int!
+    var mutationRate: Double!
+    
+    // A delegate will recieve simulation updates in real-time
+    var simulationDelegate: SimulationDelegate?
     
     
     public init(populationSize: Int, mutationRate: Double, startCity: City, cities: [City]) {
@@ -56,8 +59,17 @@ public class GeneticAlgorithm {
             // Establish new population / generation of Tours
             currentPopulation = Population(tours: nextGeneration)
             
-            if let distance = distanceForBestTour() {
-                print("Generation \(generation): Total distance = \(distance)")
+//            if let distance = distanceForBestTour() {
+//                print("Generation \(generation): Total distance = \(distance)")
+//            }
+        }
+        
+        
+        // On main thread, signal to delegate to draw the path by calling this protocol method
+        DispatchQueue.main.async {
+            if let delegate = self.simulationDelegate,
+                let fittest = self.currentPopulation.getFittest() {
+                delegate.yieldNewGeneration(fittest: fittest)
             }
         }
         
@@ -189,14 +201,9 @@ public class GeneticAlgorithm {
     }
 }
 
-/*
-extension Array {
-    func shiftRight(amount: Int) -> [Element] {
-        return Array(self[(self.count - amount) ..< self.count] + self[0 ..< (self.count - amount)])
-    }
+
+// Define protocol in which delegate will recieve updtes on simulation progress
+public protocol SimulationDelegate {
     
-    mutating func shiftRightInPlace(amount: Int) {
-        self = shiftRight(amount: amount)
-    }
+    func yieldNewGeneration(fittest: Tour)
 }
- */
