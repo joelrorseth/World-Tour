@@ -8,20 +8,27 @@ public class GeneticAlgorithm {
     var tourSize: Int!
     var mutationRate: Double!
     
+    // Functions defined elsewhere
+    var selection: ((Population) -> Tour)
+    var crossover: ((Tour, Tour) -> Tour)
+    
     // A delegate will recieve simulation updates in real-time
     var simulationDelegate: SimulationDelegate?
     
     
-    public init(populationSize: Int, mutationRate: Double, startCity: City, cities: [City]) {
+    public init(parameters: GeneticParameters, startCity: City, cities: [City]) {
         
         // Generate a single population for the genetic algorithm to evolve
         currentPopulation = Population(size: populationSize,
             startCity: startCity, cities: cities)
         
         self.startCity = startCity
-        self.populationSize = populationSize
+        self.populationSize = parameters.populationSize
         self.tourSize = cities.count
-        self.mutationRate = mutationRate
+        self.mutationRate = parameters.mutationRate
+        
+        self.selection = parameters.selection
+        self.crossover = parameters.crossover
     }
 
     
@@ -40,14 +47,18 @@ public class GeneticAlgorithm {
             for _ in 0..<populationSize {
                 
                 // Obtain total distance over all tours in population -- total population distance
-                let currentTotalDistance = currentPopulation.totalDistanceOverAllTours()
+                //let currentTotalDistance = currentPopulation.totalDistanceOverAllTours()
                 
-                guard let parentOne = self.selectParent(populationDistance: currentTotalDistance),
-                    let parentTwo = self.selectParent(populationDistance: currentTotalDistance)
-                    else { continue }
+                // Choose two parents randomly, favouring the fit
+                let parentOne = selection(currentPopulation)
+                let parentTwo = selection(currentPopulation)
+                
+//                guard let parentOne = self.selectParent(populationDistance: currentTotalDistance),
+//                    let parentTwo = self.selectParent(populationDistance: currentTotalDistance)
+//                    else { continue }
 
                 // Parents produce a single offspring
-                var childTour = produceOffspring(firstParent: parentOne, secondParent: parentTwo)
+                var childTour = crossover(parentOne, parentTwo)
 
                 // Randomly apply a mutation to the new Tour
                 mutate(tour: &childTour)
@@ -82,46 +93,46 @@ public class GeneticAlgorithm {
         return currentPopulation.getFittest()?.totalDistance
     }
     
-    // Select a single Tour, with likelihood increasing proportional to fitness within population
-    private func selectParent(populationDistance: Double) -> Tour? {
-
-        // Generate random number in [0,1]
-        let fitness = Double(arc4random()) / Double(UINT32_MAX)
-        
-        var currentFitness: Double = 0.0
-        var result: Tour?
-        
-        // Probability of Tour being selected as parent is equal to its fitness proportional to others in population
-        currentPopulation.tours.forEach { (tour) in
-            if currentFitness <= fitness {
-                
-                // Increase probability threshold and set this tour as current selection
-                currentFitness += tour.fitness(withPopulationDistance: populationDistance)
-                result = tour
-            }
-        }
-        
-        return result
-    }
+//    // Select a single Tour, with likelihood increasing proportional to fitness within population
+//    private func selectParent(populationDistance: Double) -> Tour? {
+//
+//        // Generate random number in [0,1]
+//        let fitness = Double(arc4random()) / Double(UINT32_MAX)
+//        
+//        var currentFitness: Double = 0.0
+//        var result: Tour?
+//        
+//        // Probability of Tour being selected as parent is equal to its fitness proportional to others in population
+//        currentPopulation.tours.forEach { (tour) in
+//            if currentFitness <= fitness {
+//                
+//                // Increase probability threshold and set this tour as current selection
+//                currentFitness += tour.fitness(withPopulationDistance: populationDistance)
+//                result = tour
+//            }
+//        }
+//        
+//        return result
+//    }
     
     
     // Produce an offspring Tour for two Tours
-    private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
-        
-        let slice: Int = Int(arc4random_uniform(UInt32(firstParent.cities.count)))
-        var cities: [City] = Array(firstParent.cities[0..<slice])
-        
-        var idx = slice
-        while cities.count < secondParent.cities.count {
-            let city = secondParent.cities[idx]
-            if cities.contains(city) == false {
-                cities.append(city)
-            }
-            idx = (idx + 1) % secondParent.cities.count
-        }
-        
-        return Tour(start: startCity, cities: cities)
-    }
+//    private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
+//        
+//        let slice: Int = Int(arc4random_uniform(UInt32(firstParent.cities.count)))
+//        var cities: [City] = Array(firstParent.cities[0..<slice])
+//        
+//        var idx = slice
+//        while cities.count < secondParent.cities.count {
+//            let city = secondParent.cities[idx]
+//            if cities.contains(city) == false {
+//                cities.append(city)
+//            }
+//            idx = (idx + 1) % secondParent.cities.count
+//        }
+//        
+//        return Tour(start: startCity, cities: cities)
+//    }
     
     
     // Implementation of the Ordered Crossover (OX) crossover operator proposed by Davis

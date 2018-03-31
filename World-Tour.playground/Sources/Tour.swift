@@ -2,7 +2,7 @@ import Foundation
 
 public struct Tour: Comparable {
     
-    var startCity: City!
+    public var startCity: City!
     public var cities = [City]()
     
     

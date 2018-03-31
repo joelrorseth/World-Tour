@@ -8,6 +8,10 @@ public class MapScene: SKScene {
     var pathNodes: [SKNode] = []
     var distanceTextView: UITextView!
     
+    // Important: Parameters for genetic simulation
+    public var simulationParameters: GeneticParameters?
+    
+    
     // MARK: View Lifecycle
     override public func didMove(to view: SKView) {
         
@@ -102,6 +106,8 @@ public class MapScene: SKScene {
     public func startGeneticAlgorithm() {
         
         if markerNodes.count <= 2 { return }
+        guard let parameters = simulationParameters else { return }
+        
         distanceTextView.text = "Running..."
         
         //var cities = CityFactory.createCitiesFromJSON()
@@ -112,15 +118,16 @@ public class MapScene: SKScene {
         cities = Array(cities[1...])
         
         // Create genetic algorithm instance with parameters
-        let algo = GeneticAlgorithm(populationSize: 100, mutationRate: 1.5,
-                                    startCity: startCity, cities: cities)
+        let algo = GeneticAlgorithm(parameters: parameters,
+                        startCity: startCity, cities: cities)
         algo.simulationDelegate = self
         
         DispatchQueue.global(qos: .background).async {
             print("Scene has called GA on background thread")
             
             // Print results of genetic simulation
-            let bestSequence = algo.simulateNGenerations(n: 500)
+            let bestSequence = algo.simulateNGenerations(
+                n: parameters.numberOfGenerations)
             
             DispatchQueue.main.async {
                 print("Scene main queue is processing the results")

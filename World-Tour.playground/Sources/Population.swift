@@ -4,7 +4,7 @@ public class Population {
     
     // A population is a collection of genetic samples
     // For our purposes, a population is essentially a collection of Tours
-    var tours = [Tour]()
+    public var tours = [Tour]()
     
     var sumFitnessAllTours: Double {
         return tours.reduce(0.0, { $0 + ($1).fitness })

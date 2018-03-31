@@ -2,14 +2,30 @@ import SpriteKit
 
 public class MapViewController: UIViewController {
     
-    var gameView: SKView!
-    var scene: MapScene!
+    public var gameView: SKView!
+    public var scene: MapScene!
     
     // =====================================
     // =====================================
     public override func viewDidLoad() {
         
         view.isUserInteractionEnabled = true
+        
+//        // Load scene into view controller
+//        scene = MapScene(size: CGSize(
+//            width: gameView.frame.size.width,
+//            height: gameView.frame.size.height
+//        ))
+//        scene.backgroundColor = UIColor(red: 203/255, green: 209/255,
+//                                        blue: 208/255, alpha: 1.0)
+//        
+//        // Scene will be identical in size to gameView
+//        scene.scaleMode = .aspectFit
+//        
+//        // Create the Binary Search Tree that this scene will be displaying
+//        self.gameView.presentScene(scene)
+        
+        
         
         // Setup content view, disable automatic constraints
         gameView = SKView()
@@ -119,13 +135,12 @@ public class MapViewController: UIViewController {
     // =====================================
     public override func viewDidAppear(_ animated: Bool) {
         
-        // Load scene into view controller
-        scene = MapScene(size: CGSize(
-            width: gameView.frame.size.width,
-            height: gameView.frame.size.height
-        ))
+    }
+    
+    public func presentScene(scene: MapScene) {
+        
         scene.backgroundColor = UIColor(red: 203/255, green: 209/255,
-                                       blue: 208/255, alpha: 1.0)
+                                        blue: 208/255, alpha: 1.0)
         
         // Scene will be identical in size to gameView
         scene.scaleMode = .aspectFit
