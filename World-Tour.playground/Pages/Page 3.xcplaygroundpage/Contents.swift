@@ -16,19 +16,27 @@ import PlaygroundSupport
 import UIKit
 
 
-//let mapVC = MapViewController()
-//mapVC.preferredContentSize = CGSize(width: 600, height: 600)
-//
-//PlaygroundPage.current.liveView = mapVC
-//let scene = MapScene(size: CGSize(
-//    width: 600,
-//    height: 600
-//))
-////scene.simulationParameters = parameters
-//mapVC.presentScene(scene: scene)
+// Define the number of solutions that will evolve in our population
+let populationSize = 10
 
-public class VC : UITableViewController {}
+// Number of generations to evolve the population
+let numGenerations = 500
 
-let vc = VC()
-let m = UINavigationController(rootViewController: vc)
-PlaygroundPage.current.liveView = m
+// The probability (in whole number percentage) of a random sequence mutation
+let mutationRate = 1.5
+
+
+
+
+let parameters = GeneticParameters(populationSize: populationSize,
+    numberOfGenerations: numGenerations, mutationRate: mutationRate)
+
+let screenSize = CGSize(width: 600, height: 600)
+let mapVC = MapViewController()
+mapVC.preferredContentSize = screenSize
+
+PlaygroundPage.current.liveView = mapVC
+let scene = MapScene(size: screenSize)
+scene.simulationParameters = parameters
+mapVC.presentScene(scene: scene)
+

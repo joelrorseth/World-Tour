@@ -18,7 +18,7 @@ public class PnPGeneticAlgorithm {
     public var simulationDelegate: SimulationDelegate?
     
     
-    public init(parameters: GeneticParameters, startCity: City, cities: [City]) {
+    public init(parameters: PnPGeneticParameters, startCity: City, cities: [City]) {
         
         self.startCity = startCity
         self.populationSize = parameters.populationSize

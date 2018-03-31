@@ -37,6 +37,8 @@ import QuartzCore
 // Define the number of solutions that will evolve in our population
 let populationSize = 10
 
+// Define the number of 🇨🇦 cities for the Salesman to travel to
+let numberOfCities = 20
 
 /*:
  ## Selection
@@ -126,7 +128,7 @@ let mutationRate = 1.5      // eg. 1.5% chance of mutation
 
 
 // Here we are packaging our parameters in a struct to pass to simulation
-let parameters = GeneticParameters(populationSize: populationSize,
+let parameters = PnPGeneticParameters(populationSize: populationSize,
                                    numberOfGenerations: numGenerations,
                                    mutationRate: mutationRate,
                                    selection: selection,
@@ -153,7 +155,7 @@ let parameters = GeneticParameters(populationSize: populationSize,
 // Our genome will be a sequence of 🇨🇦 cities
 // Thus, fitness is based on latitude/longitude and distance from other cities
 
-var allCities = CityFactory.createCitiesFromJSON(number: 10)
+var allCities = CityFactory.createCitiesFromJSON(number: numberOfCities)
 
 // Use the first city as the starting city
 
@@ -166,6 +168,7 @@ let geneticAlgorithm = PnPGeneticAlgorithm(
     parameters: parameters,
     startCity: startCity,
     cities: cities)
+
 
 // The GATableViewController will recieve updates in real time after each generation
 // We let it control the simulation to provide these real-time updates

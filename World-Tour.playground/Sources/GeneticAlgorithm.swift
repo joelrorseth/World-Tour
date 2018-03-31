@@ -9,10 +9,6 @@ public class GeneticAlgorithm {
     var tourSize: Int!
     var mutationRate: Double!
     
-    // Functions defined elsewhere
-    var selection: ((Population, Double) -> Tour)
-    var crossover: ((Tour, Tour) -> Tour)
-    
     // A delegate will recieve simulation updates in real-time
     var simulationDelegate: SimulationDelegate?
     
@@ -24,9 +20,6 @@ public class GeneticAlgorithm {
         self.tourSize = cities.count
         self.mutationRate = parameters.mutationRate
 
-        self.selection = parameters.selection
-        self.crossover = parameters.crossover
-
         // Generate a single population for the genetic algorithm to evolve
         currentPopulation = Population(size: parameters.populationSize,
             startCity: startCity, cities: cities)
@@ -35,62 +28,42 @@ public class GeneticAlgorithm {
     
     // Simulate the evolution of 'n' generations
     public func simulateNGenerations(n: Int) -> Tour? {
-        
-        if let distance = distanceForBestTour() {
-            print("Initial population: Total distance = \(distance)")
-        }
+        reportNewGeneration(generation: 0)
         
         // Run Genetic Algorithm across 'n' generations
-        for generation in 1 ... n {
+        for gen in 1 ... n {
             
             var nextGeneration = [Tour]()
 
             for p in 0..<populationSize {
                 
-                //print(">> New gen")
                 // Obtain total distance over all tours in population -- total population distance
                 let populationTotalDistance = currentPopulation.totalDistanceOverAllTours()
-                //print(">> Got dist, getting parents")
-                // Choose two parents randomly, favouring the fit
-                let parentOne = selection(currentPopulation, populationTotalDistance)
-                let parentTwo = selection(currentPopulation, populationTotalDistance)
-                //print(">> ... got tha parents")
                 
-//                guard let parentOne = self.selectParent(populationDistance: currentTotalDistance),
-//                    let parentTwo = self.selectParent(populationDistance: currentTotalDistance)
-//                    else { continue }
+                // Choose two parents randomly, favouring the fit
+                let parentOne = selectParent(populationDistance: populationTotalDistance)
+                let parentTwo = selectParent(populationDistance: populationTotalDistance)
 
                 // Parents produce a single offspring
-                //print(">> Cross...")
-                var childTour = crossover(parentOne, parentTwo)
-                //print(">> ...Done Cross, doing mutation")
+                var childTour = produceOffspring(
+                    firstParent: parentOne, secondParent:parentTwo)
+                
                 // Randomly apply a mutation to the new Tour
                 mutate(tour: &childTour)
-                //print(">> ... Done mut, adding to pop")
+                
                 // Add tour to next generation
                 nextGeneration.append(childTour)
-                //print(">> Member added, next up!...")
             }
             
             // Establish new population / generation of Tours
             currentPopulation = Population(tours: nextGeneration)
-            
-            if let distance = distanceForBestTour() {
-                print("Generation \(generation): Total distance = \(distance)")
-            }            
+            reportNewGeneration(generation: gen)
         }
         
-        
-        // On main thread, signal to delegate to draw the path by calling this protocol method
-        DispatchQueue.main.async {
-            if let delegate = self.simulationDelegate,
-                let fittest = self.currentPopulation.getFittest() {
-                delegate.yieldNewGeneration(fittest: fittest)
-            }
-        }
-        
+        reportSimulationFinished()
         return currentPopulation.getFittest()
     }
+    
     
     // Return the score of the best Tour sequence in the current population
     public func distanceForBestTour() -> Double? {
@@ -98,46 +71,47 @@ public class GeneticAlgorithm {
         return currentPopulation.getFittest()?.totalDistance
     }
     
-//    // Select a single Tour, with likelihood increasing proportional to fitness within population
-//    private func selectParent(populationDistance: Double) -> Tour? {
-//
-//        // Generate random number in [0,1]
-//        let fitness = Double(arc4random()) / Double(UINT32_MAX)
-//        
-//        var currentFitness: Double = 0.0
-//        var result: Tour?
-//        
-//        // Probability of Tour being selected as parent is equal to its fitness proportional to others in population
-//        currentPopulation.tours.forEach { (tour) in
-//            if currentFitness <= fitness {
-//                
-//                // Increase probability threshold and set this tour as current selection
-//                currentFitness += tour.fitness(withPopulationDistance: populationDistance)
-//                result = tour
-//            }
-//        }
-//        
-//        return result
-//    }
+    
+    // Select a single Tour, with likelihood increasing proportional to fitness within population
+    private func selectParent(populationDistance: Double) -> Tour {
+
+        // Generate random number in [0,1]
+        let fitness = Double(arc4random()) / Double(UINT32_MAX)
+        
+        var currentFitness: Double = 0.0
+        var result: Tour!
+        
+        // Probability of Tour being selected as parent is equal to its fitness proportional to others in population
+        currentPopulation.tours.forEach { (tour) in
+            if currentFitness <= fitness {
+                
+                // Increase probability threshold and set this tour as current selection
+                currentFitness += tour.fitness(withPopulationDistance: populationDistance)
+                result = tour
+            }
+        }
+        
+        return result
+    }
     
     
     // Produce an offspring Tour for two Tours
-//    private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
-//        
-//        let slice: Int = Int(arc4random_uniform(UInt32(firstParent.cities.count)))
-//        var cities: [City] = Array(firstParent.cities[0..<slice])
-//        
-//        var idx = slice
-//        while cities.count < secondParent.cities.count {
-//            let city = secondParent.cities[idx]
-//            if cities.contains(city) == false {
-//                cities.append(city)
-//            }
-//            idx = (idx + 1) % secondParent.cities.count
-//        }
-//        
-//        return Tour(start: startCity, cities: cities)
-//    }
+    private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
+        
+        let slice: Int = Int(arc4random_uniform(UInt32(firstParent.cities.count)))
+        var cities: [City] = Array(firstParent.cities[0..<slice])
+        
+        var idx = slice
+        while cities.count < secondParent.cities.count {
+            let city = secondParent.cities[idx]
+            if cities.contains(city) == false {
+                cities.append(city)
+            }
+            idx = (idx + 1) % secondParent.cities.count
+        }
+        
+        return Tour(start: startCity, cities: cities)
+    }
     
     
     // Implementation of the Ordered Crossover (OX) crossover operator proposed by Davis
@@ -200,8 +174,6 @@ public class GeneticAlgorithm {
     // Mutation function will randomly apply a single mutation
     // In travelling salesman, this means we randomly swap position of two cities in Tour
     private func mutate(tour: inout Tour) {
-
-        //let startTime = CACurrentMediaTime()
         
         // Generate random number [0,100)
         let rate = Double(arc4random_uniform(101)) / 100.0
@@ -216,15 +188,24 @@ public class GeneticAlgorithm {
             // Perform the random mutation by swapping the cities
             tour.cities.swapAt(i, j)
         }
+    }
+    
+    // Issue updates regarding the new generation
+    public func reportNewGeneration(generation: Int) {
         
-        //print("[#] Mut \(CACurrentMediaTime() - startTime)")
+        // Print to console
+        if let distance = distanceForBestTour() {
+            print("Generation \(generation): Total distance = \(distance)")
+        }
+    }
+    
+    // Issue update regarding simulation finishing
+    public func reportSimulationFinished() {
+        
+        // Signal to delegate to draw the path by calling this protocol method
+        if let delegate = self.simulationDelegate,
+            let fittest = self.currentPopulation.getFittest() {
+            delegate.yieldNewGeneration(fittest: fittest)
+        }
     }
 }
-
-
-//// Define protocol in which delegate will recieve updtes on simulation progress
-//public protocol SimulationDelegate {
-//    
-//    func yieldNewGeneration(fittest: Tour)
-//}
-

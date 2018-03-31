@@ -23,9 +23,7 @@ public class MapScene: SKScene {
         background.isUserInteractionEnabled = false
         background.zPosition = 1
         addChild(background)
-        
-        print(background.size)
-        
+                
         // Add our own camera node for better control
         cam = SKCameraNode()
         cam.position = CGPoint(x: frame.midX, y: frame.midY)
@@ -35,11 +33,7 @@ public class MapScene: SKScene {
         self.camera = cam
         self.addChild(cam)
         
-        // Add gesture recognizer to view for pinch gestures
-        let pinchGesture = UIPinchGestureRecognizer(
-            target: self, action: #selector(self.handlePinch(_:)))
-        self.view?.addGestureRecognizer(pinchGesture)
-        
+        // Add toolbar for dynamic simulation control in live view
         setupToolbar(view: view)
     }
     
@@ -78,7 +72,8 @@ public class MapScene: SKScene {
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
             target: nil, action: nil)
         
-        toolbar.setItems([startItem, spacer, distanceItem, spacer, stopItem, spacer], animated: true)
+        toolbar.setItems([startItem, spacer, distanceItem, spacer, stopItem],
+                         animated: true)
         view.addSubview(toolbar)
     }
     
@@ -89,7 +84,9 @@ public class MapScene: SKScene {
         switch (title) {
             
         case "Start":
-            startGeneticAlgorithm()
+            DispatchQueue.global(qos: .background).async {
+                self.startGeneticAlgorithm()
+            }
             break
             
         case "Reset":
@@ -102,22 +99,23 @@ public class MapScene: SKScene {
     }
     
     
-    // MARK: Simulation Control
+    // MARK: Simulation Control (should be started from background queue)
+    // Begin the genetic algorithm evolution process on user's points
     public func startGeneticAlgorithm() {
         
         if markerNodes.count <= 2 { return }
         guard let parameters = simulationParameters else { return }
         
-        distanceTextView.text = "Running..."
+        // Update status on main queue
+        DispatchQueue.main.async { self.distanceTextView.text = "Running..." }
         
+        // Create cities from the points, simulate them as locations
         var cities = CityFactory.createCitiesFromNodes(
             nodes: markerNodes, parent: background)
         
-        
+        // Assume start city is first selected
         let startCity = cities.first!
         cities = Array(cities[1...])
-        
-        print("\(parameters)\nStart:\(startCity)\nCities:\(cities)")
         
         // Create genetic algorithm instance with parameters
         let algo = GeneticAlgorithm(parameters: parameters,
@@ -125,31 +123,22 @@ public class MapScene: SKScene {
         
         algo.simulationDelegate = self
         
-        DispatchQueue.global(qos: .background).async {
-            print("Scene has called GA on background thread")
-            
-            // Print results of genetic simulation
-            let bestSequence = algo.simulateNGenerations(
-                n: parameters.numberOfGenerations)
-            
-            DispatchQueue.main.async {
-                print("Scene main queue is processing the results")
-                
-                guard let sequence = bestSequence else { return }
-                for city in sequence.cities {
-                    print(city.name, terminator: "->")
-                }
-            }
-        }
+        // Print results of genetic simulation
+        let _ = algo.simulateNGenerations(
+            n: parameters.numberOfGenerations)
     }
     
+    // Reset the live view contents including all markers and paths
     public func resetGeneticAlgorithm() {
         
-        background.removeAllChildren()
-        markerNodes.removeAll()
-        pathNodes.removeAll()
-        
-        distanceTextView.text = ""
+        // Reset all on-screen input to the simulation
+        DispatchQueue.main.async {
+            
+            self.background.removeAllChildren()
+            self.markerNodes.removeAll()
+            self.pathNodes.removeAll()
+            self.distanceTextView.text = ""
+        }
     }
     
     
@@ -164,15 +153,6 @@ public class MapScene: SKScene {
             let touchPosition = touch.location(in: self)
             dropMarker(at: touchPosition)
         }
-    }
-    
-    // Handler function for pinch gestures
-    @objc public func handlePinch(_ sender: UIPinchGestureRecognizer) {
-
-        // Scale the background node and all children (markers, paths)
-        let pinchScaleTransform = SKAction.scale(by: sender.scale, duration: 0.0)
-        background.run(pinchScaleTransform)
-        sender.scale = 1.0
     }
     
     
@@ -201,17 +181,13 @@ public class MapScene: SKScene {
         let ptA = CGPoint(x: cityA.latitude, y: cityA.longitude)
         let ptB = CGPoint(x: cityB.latitude, y: cityB.longitude)
         
-        // Draw a path between the x,y world / scene position of both cities
-//        drawPath(from: convert(ptA, from: background),
-//                 to: convert(ptB, from: background), color: color)
-        
+        // Draw a path between points
         drawPath(from: ptA, to: ptB, color: color)
     }
     
     // Render a path (node) between two points in the scene, relative to background node
     public func drawPath(from pointA: CGPoint, to pointB: CGPoint, color: UIColor) {
         
-        // TODO
         let edgePath  = CGMutablePath()
         edgePath.move(to: CGPoint(x: pointA.x, y: pointA.y))
         edgePath.addLine(to: CGPoint(x: pointB.x, y: pointB.y))
@@ -219,7 +195,7 @@ public class MapScene: SKScene {
         // Create a SKShapeNode to represent the edge as a straight line
         let shape = SKShapeNode()
         shape.path = edgePath
-        shape.strokeColor = .red
+        shape.strokeColor = color
         shape.lineWidth = 8.0
         shape.zPosition = 4
         shape.isHidden = true
@@ -234,45 +210,42 @@ extension MapScene: SimulationDelegate {
     
     public func yieldNewGeneration(fittest: Tour) {
         
-        pathNodes.removeAll()
-        
-        
-        drawPathBetween(cityA: fittest.startCity,
-                        cityB: fittest.cities.first!,
-                        color: UIColor(red: 0, green: 0, blue: 0.3, alpha: 1))
-        
-        let numPaths = fittest.cities.count - 1
-        
-        // Draw the sequence of cities defined by this Tour
-        for i in 0..<numPaths {
+        // Update the map UI on the main thread
+        DispatchQueue.main.async {
             
-            let color = UIColor(
-                red: CGFloat(Double(i)/Double(numPaths)),
-                green: 0,
-                blue: 0.3,
-                alpha: 1.0)
+            self.distanceTextView.text = "Finished"
+            self.pathNodes.removeAll()
             
-            UIView.animate(withDuration: 5) {
+            // Draw parth from start city to first in sequence
+            self.drawPathBetween(cityA: fittest.startCity,
+                cityB: fittest.cities.first!, color: UIColor.red)
+            
+            let numPaths = fittest.cities.count - 1
+            
+            // Draw the sequence of cities defined by this Tour
+            for i in 0..<numPaths {
                 
-                self.drawPathBetween(cityA: fittest.cities[i],
-                            cityB: fittest.cities[i+1],
-                            color: color)
+                UIView.animate(withDuration: 5) {
+                    
+                    self.drawPathBetween(cityA: fittest.cities[i],
+                        cityB: fittest.cities[i+1], color: UIColor.red)
+                }
             }
+            
+            // Draw path between start city -> first city, last city -> start city
+            self.drawPathBetween(cityA: fittest.cities.last!,
+                cityB: fittest.startCity, color: UIColor.red)
+            
+            self.distanceTextView.text = "\(Int(fittest.totalDistance)) km"
+            self.animateNodes(self.pathNodes)
         }
-        
-        // Draw path between start city -> first city, last city -> start city
-        drawPathBetween(cityA: fittest.cities.last!,
-                        cityB: fittest.startCity,
-                        color: UIColor(red: 1, green: 0, blue: 0.3, alpha: 1))
-        
-        distanceTextView.text = "\(Int(fittest.totalDistance)) km"
-        animateNodes(pathNodes)
     }
     
+    // Generic animation to unhide the paths once added
     public func animateNodes(_ nodes: [SKNode]) {
         for (index, node) in nodes.enumerated() {
             node.run(.sequence([
-                .wait(forDuration: TimeInterval(index) * 0.2),
+                .wait(forDuration: TimeInterval(index) * 0.4),
                 .repeat(.sequence([
                     .unhide(),
                     .wait(forDuration: 2)

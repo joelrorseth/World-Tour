@@ -5,27 +5,10 @@ public class MapViewController: UIViewController {
     public var gameView: SKView!
     public var scene: MapScene!
     
-    // =====================================
-    // =====================================
+
     public override func viewDidLoad() {
         
         view.isUserInteractionEnabled = true
-        
-//        // Load scene into view controller
-//        scene = MapScene(size: CGSize(
-//            width: gameView.frame.size.width,
-//            height: gameView.frame.size.height
-//        ))
-//        scene.backgroundColor = UIColor(red: 203/255, green: 209/255,
-//                                        blue: 208/255, alpha: 1.0)
-//        
-//        // Scene will be identical in size to gameView
-//        scene.scaleMode = .aspectFit
-//        
-//        // Create the Binary Search Tree that this scene will be displaying
-//        self.gameView.presentScene(scene)
-        
-        
         
         // Setup content view, disable automatic constraints
         gameView = SKView()
@@ -75,27 +58,6 @@ public class MapViewController: UIViewController {
                                           constant: 0)
         trailing.priority = UILayoutPriority(750.0)
         
-        
-        
-        // These constraints have highest priority
-//        let centerHorizontally = NSLayoutConstraint(item: gameView,
-//                                                    attribute: .centerX,
-//                                                    relatedBy: .equal,
-//                                                    toItem: self.view,
-//                                                    attribute: .centerX,
-//                                                    multiplier: 1.0,
-//                                                    constant: 0.0)
-//        centerHorizontally.priority = UILayoutPriority(1000.0)
-//
-//        let centerVertically = NSLayoutConstraint(item: gameView,
-//                                                  attribute: .centerY,
-//                                                  relatedBy: .equal,
-//                                                  toItem: self.view,
-//                                                  attribute: .centerY,
-//                                                  multiplier: 1.0,
-//                                                  constant: 0.0)
-//        centerVertically.priority = UILayoutPriority(1000.0)
-        
         let aspectRatio = NSLayoutConstraint(item: gameView,
                                              attribute: .height,
                                              relatedBy: .equal,
@@ -124,21 +86,14 @@ public class MapViewController: UIViewController {
         height.priority = UILayoutPriority(1000.0)
         
         
-        // Add constraints to the view to resize gameView dynamically
-        // These constraints are especially important on the iPad
-//        NSLayoutConstraint.activate([leading, trailing, centerVertically, centerHorizontally, aspectRatio, width, height])
-    
-    NSLayoutConstraint.activate([leading, trailing, top, bottom])
+        NSLayoutConstraint.activate([leading, trailing, top, bottom])
     }
     
-    // =====================================
-    // =====================================
-    public override func viewDidAppear(_ animated: Bool) {
-        
-    }
-    
+
+    // Manually present the MapScene
     public func presentScene(scene: MapScene) {
         
+        // Match map image background color
         scene.backgroundColor = UIColor(red: 203/255, green: 209/255,
                                         blue: 208/255, alpha: 1.0)
         
