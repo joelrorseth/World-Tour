@@ -79,6 +79,7 @@ public class PnPGeneticAlgorithm {
     
     // Return the score of the best Tour sequence in the current population
     public func distanceForBestTour() -> Double? {
+
         return currentPopulation.getFittest()?.totalDistance
     }
     

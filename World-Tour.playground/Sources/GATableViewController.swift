@@ -30,7 +30,10 @@ public class GATableViewController: UITableViewController {
     @objc public func runClicked() {
 
         if let algorithm = algorithm {
-            _ = algorithm.simulateNGenerations()
+            
+            DispatchQueue.global(qos: .background).async {
+                _ = algorithm.simulateNGenerations()
+            }
 
         } else { print("Error: Must set GANavigationController's algorithm property") }
     }
@@ -41,17 +44,16 @@ extension GATableViewController: SimulationDelegate {
     
     public func yieldNewGeneration(fittest: Tour) {
         
-        // Add this new tour to the Tour list
-        tours.append(fittest)
+        DispatchQueue.main.async {
         
-        print("Start")
-        
-        // Dynamically update table view
-        tableView.beginUpdates()
-        tableView.insertRows(at: [IndexPath(row: tours.count-1, section: 0)], with: .automatic)
-        tableView.endUpdates()
-
-        print("Finish")
+            // Add this new tour to the Tour list
+            self.tours.append(fittest)
+            
+            // Dynamically update table view
+            self.tableView.beginUpdates()
+            self.tableView.insertRows(at: [IndexPath(row: self.tours.count-1, section: 0)], with: .automatic)
+            self.tableView.endUpdates()
+        }
     }
 }
 
