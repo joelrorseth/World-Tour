@@ -1,4 +1,5 @@
 import Foundation
+import QuartzCore
 
 public class GeneticAlgorithm {
     
@@ -9,7 +10,7 @@ public class GeneticAlgorithm {
     var mutationRate: Double!
     
     // Functions defined elsewhere
-    var selection: ((Population) -> Tour)
+    var selection: ((Population, Double) -> Tour)
     var crossover: ((Tour, Tour) -> Tour)
     
     // A delegate will recieve simulation updates in real-time
@@ -18,17 +19,17 @@ public class GeneticAlgorithm {
     
     public init(parameters: GeneticParameters, startCity: City, cities: [City]) {
         
-        // Generate a single population for the genetic algorithm to evolve
-        currentPopulation = Population(size: populationSize,
-            startCity: startCity, cities: cities)
-        
         self.startCity = startCity
         self.populationSize = parameters.populationSize
         self.tourSize = cities.count
         self.mutationRate = parameters.mutationRate
-        
+
         self.selection = parameters.selection
         self.crossover = parameters.crossover
+
+        // Generate a single population for the genetic algorithm to evolve
+        currentPopulation = Population(size: parameters.populationSize,
+            startCity: startCity, cities: cities)
     }
 
     
@@ -44,35 +45,39 @@ public class GeneticAlgorithm {
             
             var nextGeneration = [Tour]()
 
-            for _ in 0..<populationSize {
+            for p in 0..<populationSize {
                 
+                //print(">> New gen")
                 // Obtain total distance over all tours in population -- total population distance
-                //let currentTotalDistance = currentPopulation.totalDistanceOverAllTours()
-                
+                let populationTotalDistance = currentPopulation.totalDistanceOverAllTours()
+                //print(">> Got dist, getting parents")
                 // Choose two parents randomly, favouring the fit
-                let parentOne = selection(currentPopulation)
-                let parentTwo = selection(currentPopulation)
+                let parentOne = selection(currentPopulation, populationTotalDistance)
+                let parentTwo = selection(currentPopulation, populationTotalDistance)
+                //print(">> ... got tha parents")
                 
 //                guard let parentOne = self.selectParent(populationDistance: currentTotalDistance),
 //                    let parentTwo = self.selectParent(populationDistance: currentTotalDistance)
 //                    else { continue }
 
                 // Parents produce a single offspring
+                //print(">> Cross...")
                 var childTour = crossover(parentOne, parentTwo)
-
+                //print(">> ...Done Cross, doing mutation")
                 // Randomly apply a mutation to the new Tour
                 mutate(tour: &childTour)
-
+                //print(">> ... Done mut, adding to pop")
                 // Add tour to next generation
                 nextGeneration.append(childTour)
+                //print(">> Member added, next up!...")
             }
             
             // Establish new population / generation of Tours
             currentPopulation = Population(tours: nextGeneration)
             
-//            if let distance = distanceForBestTour() {
-//                print("Generation \(generation): Total distance = \(distance)")
-//            }
+            if let distance = distanceForBestTour() {
+                print("Generation \(generation): Total distance = \(distance)")
+            }            
         }
         
         
@@ -196,6 +201,8 @@ public class GeneticAlgorithm {
     // In travelling salesman, this means we randomly swap position of two cities in Tour
     private func mutate(tour: inout Tour) {
 
+        //let startTime = CACurrentMediaTime()
+        
         // Generate random number [0,100)
         let rate = Double(arc4random_uniform(101)) / 100.0
         
@@ -209,12 +216,15 @@ public class GeneticAlgorithm {
             // Perform the random mutation by swapping the cities
             tour.cities.swapAt(i, j)
         }
+        
+        //print("[#] Mut \(CACurrentMediaTime() - startTime)")
     }
 }
 
 
-// Define protocol in which delegate will recieve updtes on simulation progress
-public protocol SimulationDelegate {
-    
-    func yieldNewGeneration(fittest: Tour)
-}
+//// Define protocol in which delegate will recieve updtes on simulation progress
+//public protocol SimulationDelegate {
+//    
+//    func yieldNewGeneration(fittest: Tour)
+//}
+

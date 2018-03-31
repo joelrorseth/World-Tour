@@ -12,8 +12,8 @@ import SpriteKit
 public class CityFactory {
 
     // Factory method to return array of all cities (read from JSON)
-    public static func createCitiesFromJSON() -> [City] {
-
+    public static func createCitiesFromJSON(number: Int) -> [City] {
+        
         if let jsonFile = Bundle.main.url(forResource: "ca", withExtension: "json") {
             do {
                 
@@ -24,7 +24,11 @@ public class CityFactory {
                 let decoder = JSONDecoder()
                 let jsonCities = try decoder.decode([City].self, from: data)
 
-                return jsonCities
+                // Avoid too many cities being requested
+                let number = (number > jsonCities.count) ? jsonCities.count : number
+                
+                // Return the first 'number' cities
+                return Array(jsonCities[0..<number])
             
             } catch {
                 print("Error decoding JSON: \(error)")
@@ -39,21 +43,19 @@ public class CityFactory {
         
         var cities = [City]()
         
-        print("Starting")
-        for node in nodes {
+        for i in 0..<nodes.count {
             
             // Treate x and y position as latitude and longitude
             // Note: x,y coordinates are local to background node, must be transformed back
             
             
             cities.append(
-                City(name: "Anon",
-                     lat: Double(node.position.x),
-                     lng: Double(node.position.y))
+                City(name: "P\(i+1)",
+                     lat: Double(nodes[i].position.x),
+                     lng: Double(nodes[i].position.y))
             )
         }
         
-        print("All good")
         return cities
     }
 }

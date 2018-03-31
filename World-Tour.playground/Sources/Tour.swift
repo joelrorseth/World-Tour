@@ -63,3 +63,21 @@ public struct Tour: Comparable {
         return left.totalDistance == right.totalDistance
     }
 }
+
+extension Tour: CustomStringConvertible {
+    
+    // String representation
+    public var description: String {
+        
+        // Start city to first in city sequence
+        var str = startCity.name + "->"
+        
+        // Cities in between
+        for city in self.cities {
+            str += city.name + " -> "
+        }
+        
+        // Last city back to start
+        return str + "->" + startCity.name
+    }
+}

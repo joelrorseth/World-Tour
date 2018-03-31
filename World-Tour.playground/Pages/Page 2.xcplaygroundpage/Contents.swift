@@ -21,7 +21,7 @@
 
 import PlaygroundSupport
 import UIKit
-
+import QuartzCore
 /*:
  ## Population
 
@@ -35,7 +35,7 @@ import UIKit
 */
 
 // Define the number of solutions that will evolve in our population
-let populationSize = 100
+let populationSize = 10
 
 
 /*:
@@ -47,12 +47,12 @@ let populationSize = 100
  to mate and help create the next generation.
  */
 
-
 // Select a single Tour, with likelihood increasing proportional to fitness within population
-private func selection(population: Population) -> Tour {
+public func selection(population: Population,
+                       populationTotalDistance: Double) -> Tour {
     
     // Use distance over all Tours to determine a given Tour's proportion!
-    let populationTotalDistance = population.totalDistanceOverAllTours()
+    //let populationTotalDistance = population.totalDistanceOverAllTours()
     
     // Generate random number in [0,1]
     let fitness = Double(arc4random()) / Double(UINT32_MAX)
@@ -91,7 +91,7 @@ private func selection(population: Population) -> Tour {
  
  */
 
-private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
+public func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
     
     let slice: Int = Int(arc4random_uniform(UInt32(firstParent.cities.count)))
     var cities: [City] = Array(firstParent.cities[0..<slice])
@@ -121,7 +121,7 @@ private func produceOffspring(firstParent: Tour, secondParent: Tour) -> Tour {
  
  */
 
-let numGenerations = 300    // 300 generations evolved
+let numGenerations = 50    // 300 generations evolved
 let mutationRate = 1.5      // eg. 1.5% chance of mutation
 
 
@@ -130,26 +130,51 @@ let parameters = GeneticParameters(populationSize: populationSize,
                                    numberOfGenerations: numGenerations,
                                    mutationRate: mutationRate,
                                    selection: selection,
-                                   crossover: produceOffspring)
+                                   crossover: produceOffspring
+)
 
 
 /*:
  
  To visualize your custom Genetic Algorithm, a colourful map of the author's home country
- of Canada has been embedded. Click on the map to drop *markers*. The salesman's path
- will be calculated (this may take a few seconds depending on the size of your
- parameters). Press *Start* to begin.
+ of Canada has been embedded. Click on the map to drop *markers*. Experiment with the
+ parameters and watch how the population evolve.
+ 
+ - note:
+ Due to the nature of Swift Playgrounds, only very small simulations will finish and show the
+ paths in the live view. Instead, look at how the algorithm is working, and how the variables
+ in the functions you defined are changing. The [next](@next) page will present a compiled
+ implementation, which will run at normal speed.
  
  */
 
 
-let mapVC = MapViewController()
-mapVC.preferredContentSize = CGSize(width: 600, height: 600)
 
-PlaygroundPage.current.liveView = mapVC
-let scene = MapScene(size: CGSize(
-    width: 600,
-    height: 600
-))
-scene.simulationParameters = parameters
-mapVC.presentScene(scene: scene)
+// Our genome will be a sequence of 🇨🇦 cities
+// Thus, fitness is based on latitude/longitude and distance from other cities
+
+var allCities = CityFactory.createCitiesFromJSON(number: 10)
+
+// Use the first city as the starting city
+
+let startCity = allCities[0]
+let cities = Array(allCities[1...])
+
+
+// Define the (plug and play) genetic algorithm formally
+let geneticAlgorithm = PnPGeneticAlgorithm(
+    parameters: parameters,
+    startCity: startCity,
+    cities: cities)
+
+// The GATableViewController will recieve updates in real time after each generation
+// We let it control the simulation to provide these real-time updates
+
+let gaViewController = GATableViewController()
+gaViewController.algorithm = geneticAlgorithm
+geneticAlgorithm.simulationDelegate = gaViewController
+
+
+let navigationController = UINavigationController(
+    rootViewController: gaViewController)
+PlaygroundPage.current.liveView = navigationController

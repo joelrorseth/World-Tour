@@ -110,16 +110,19 @@ public class MapScene: SKScene {
         
         distanceTextView.text = "Running..."
         
-        //var cities = CityFactory.createCitiesFromJSON()
         var cities = CityFactory.createCitiesFromNodes(
             nodes: markerNodes, parent: background)
+        
         
         let startCity = cities.first!
         cities = Array(cities[1...])
         
+        print("\(parameters)\nStart:\(startCity)\nCities:\(cities)")
+        
         // Create genetic algorithm instance with parameters
         let algo = GeneticAlgorithm(parameters: parameters,
                         startCity: startCity, cities: cities)
+        
         algo.simulationDelegate = self
         
         DispatchQueue.global(qos: .background).async {

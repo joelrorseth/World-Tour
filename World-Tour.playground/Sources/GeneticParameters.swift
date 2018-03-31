@@ -6,11 +6,11 @@ public struct GeneticParameters {
     var numberOfGenerations: Int!
     var mutationRate: Double!
     
-    var selection: ((Population) -> Tour)
+    var selection: ((Population, Double) -> Tour)
     var crossover: ((Tour, Tour) -> Tour)
     
     public init(populationSize: Int, numberOfGenerations: Int, mutationRate: Double,
-                selection: @escaping ((Population) -> Tour), 
+                selection: @escaping ((Population, Double) -> Tour),
                 crossover: @escaping ((Tour, Tour) -> Tour)) {
         
         self.populationSize = populationSize
