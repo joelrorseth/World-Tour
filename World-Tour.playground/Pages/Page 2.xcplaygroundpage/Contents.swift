@@ -1,83 +1,26 @@
-//
-// World Tour
-//
-// A fully interactive 3D scene, displaying Earth and animating paths and
-// an airplane to travel them.
-//
+/*:
+ ### Table of Contents
+ 
+ 1. [Genetic Algorithms](GA)
+ 2. [Tuning Parameters](Parameters)
+ 3. [Bonus](Bonus)
+ */
+
+/*:
+ ## Genetic Algorithm
+ 
+ The **Genetic Algorithm** is an adaptive search algorithm, which models its search strategy on
+ the concept of genetic evolution and natural selection. Building on the concept of a random
+ search, where solutions are randomly generated in an attempt to find an optimal solution,
+ genetic algorithms evolve a set of potential solutions based on good solutions already found.
+ The algorithm produces new sets of potential solutions, each time doing so, combining the
+ best current solutions to form potentially better solutions in the next set.
+ 
+ */
 
 import PlaygroundSupport
 import UIKit
-import SceneKit
-import MapKit
 
-public class TempView: SCNView {
-    
-    let worldScene = TempScene()
-    
-    public override init(frame: CGRect, options: [String : Any]? = nil) {
-        super.init(frame: frame, options: options)
-        
-        // Establish default view properties
-        allowsCameraControl = true
-        autoenablesDefaultLighting = true
-        
-        backgroundColor = UIColor.black
-        self.scene = worldScene
-    }
-    
-    public required init?(coder decoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-public class TempController: UIViewController, MKMapViewDelegate {
-    
-    // Encapsulate a single WorldView inside this controller
-    var worldView: TempView!
-    var mapView: MKMapView!
-    var tileRenderer: MKTileOverlayRenderer!
-    
-    // Standard initializer
-    public init () {
-        super.init(nibName: nil, bundle: nil)
-        
-        // Instantiate the WorldView
-        // TODO: Shouldn't be hardcoding dimensions here
-        worldView = TempView(frame: CGRect(x: 0, y: 0, width: 512, height: 384))
-        //self.view = worldView
-    }
-    
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-public class TempScene: SCNScene {
-
-    public override init() {
-        super.init()
-
-        var cities = CityFactory.createCitiesFromJSON()
-
-        let startCity = cities.first!
-        cities = Array(cities[1...50])
-
-        let algo = GeneticAlgorithm(populationSize: cities.count, mutationRate: 3,
-                                    startCity: startCity, cities: cities)
-
-        // Print results of genetic simulation
-        if let bestSequence = algo.simulateNGenerations(n: 300) {
-            for city in bestSequence.cities {
-                print(city.name, terminator: "->")
-            }
-        }
-    }
-
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-
-PlaygroundPage.current.liveView = TempController()
-
+let mapVC = MapViewController()
+mapVC.preferredContentSize = CGSize(width: 600, height: 600)
+PlaygroundPage.current.liveView = mapVC

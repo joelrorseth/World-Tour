@@ -3,7 +3,7 @@ import SpriteKit
 public class MapViewController: UIViewController {
     
     var gameView: SKView!
-    
+    var scene: MapScene!
     
     // =====================================
     // =====================================
@@ -120,7 +120,7 @@ public class MapViewController: UIViewController {
     public override func viewDidAppear(_ animated: Bool) {
         
         // Load scene into view controller
-        let scene = MapScene(size: CGSize(
+        scene = MapScene(size: CGSize(
             width: gameView.frame.size.width,
             height: gameView.frame.size.height
         ))
