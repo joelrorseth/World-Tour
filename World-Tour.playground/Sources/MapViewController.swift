@@ -4,18 +4,22 @@ public class MapViewController: UIViewController {
     
     var gameView: SKView!
     
+    
     // =====================================
     // =====================================
     public override func viewDidLoad() {
         
-
         view.isUserInteractionEnabled = true
         
         // Setup content view, disable automatic constraints
         gameView = SKView()
         gameView.isUserInteractionEnabled = true
         gameView.translatesAutoresizingMaskIntoConstraints = false
-        gameView.backgroundColor = UIColor.clear
+        gameView.backgroundColor =
+            UIColor(red: 203/255, green: 209/255,blue: 208/255, alpha: 1.0)
+        
+        view.backgroundColor = UIColor(red: 203/255, green: 209/255,
+                                       blue: 208/255, alpha: 1.0)
         self.view.addSubview(gameView)
         
         // These constraints have lower priority, kick in if it can satisfy others
@@ -120,6 +124,8 @@ public class MapViewController: UIViewController {
             width: gameView.frame.size.width,
             height: gameView.frame.size.height
         ))
+        scene.backgroundColor = UIColor(red: 203/255, green: 209/255,
+                                       blue: 208/255, alpha: 1.0)
         
         // Scene will be identical in size to gameView
         scene.scaleMode = .aspectFit

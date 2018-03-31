@@ -1,18 +1,3 @@
-/*:
- ### Table of Contents
- 
- 1. [Travelling Salesman Problem](Salesman)
- 2. [Genetic Algorithms](GA)
- 3. [Tuning Parameters](Parameters)
- 4. [Bonus](Bonus)
-*/
-
-/*:
- ### Overview
- 
- This is a sentence. **Bold** word.
-*/
- 
  import MapKit
  import PlaygroundSupport
  

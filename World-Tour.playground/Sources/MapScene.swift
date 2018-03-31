@@ -17,13 +17,16 @@ public class MapScene: SKScene {
         background = SKSpriteNode(imageNamed: "canada.png")
         background.position = CGPoint(x: frame.midX, y: frame.midY)
         background.isUserInteractionEnabled = false
+        background.zPosition = 1
         addChild(background)
+        
+        print(background.size)
         
         // Add our own camera node for better control
         cam = SKCameraNode()
         cam.position = CGPoint(x: frame.midX, y: frame.midY)
-        cam.xScale = 3
-        cam.yScale = 3
+        cam.xScale = 5
+        cam.yScale = 5
 
         self.camera = cam
         self.addChild(cam)
@@ -71,7 +74,7 @@ public class MapScene: SKScene {
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
             target: nil, action: nil)
         
-        toolbar.setItems([startItem, spacer, distanceItem, spacer, stopItem], animated: true)
+        toolbar.setItems([startItem, spacer, distanceItem, spacer, stopItem, spacer], animated: true)
         view.addSubview(toolbar)
     }
     
@@ -117,7 +120,7 @@ public class MapScene: SKScene {
             print("Scene has called GA on background thread")
             
             // Print results of genetic simulation
-            let bestSequence = algo.simulateNGenerations(n: 50)
+            let bestSequence = algo.simulateNGenerations(n: 500)
             
             DispatchQueue.main.async {
                 print("Scene main queue is processing the results")
