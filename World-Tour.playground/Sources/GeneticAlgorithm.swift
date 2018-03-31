@@ -3,6 +3,8 @@ import QuartzCore
 
 public class GeneticAlgorithm {
     
+    let pointsToKmFactor = 3.3
+    
     var currentPopulation: Population!
     var startCity: City!
     var populationSize: Int!
@@ -195,7 +197,7 @@ public class GeneticAlgorithm {
         
         // Print to console
         if let distance = distanceForBestTour() {
-            print("Generation \(generation): Total distance = \(distance)")
+            print("Generation \(generation): Best distance = \(distance*pointsToKmFactor) km")
         }
     }
     

@@ -29,12 +29,16 @@ public class GATableViewController: UITableViewController {
     // Begin the visual genetic algorithm evolution, updating in the contained UITableViewController
     @objc public func runClicked() {
 
+        // Clear out table view in case this is second time
+        tours.removeAll()
+        tableView.reloadData()
+        
+        // Attempt to start simulation on specified genetic algorithm instance
         if let algorithm = algorithm {
             
             DispatchQueue.global(qos: .background).async {
                 _ = algorithm.simulateNGenerations()
             }
-
         } else { print("Error: Must set GANavigationController's algorithm property") }
     }
 }
@@ -75,7 +79,7 @@ extension GATableViewController {
         }
         
         // Display Tour information
-        cell.textLabel?.text = "\(tours[indexPath.row].totalDistance) km"
+        cell.textLabel?.text = "\(tours[indexPath.row].totalDistance.rounded(to: 3)) km"
         
         if (indexPath.row == 0) {
             cell.detailTextLabel?.text = "Initial population"
@@ -86,12 +90,14 @@ extension GATableViewController {
         return cell
     }
     
+    // Number of rows
     public override func tableView(_ tableView: UITableView,
         numberOfRowsInSection section: Int) -> Int {
         
         return tours.count
     }
     
+    // Selection will segue to new view with full list of cities in sequences
     public override func tableView(_ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath) {
         

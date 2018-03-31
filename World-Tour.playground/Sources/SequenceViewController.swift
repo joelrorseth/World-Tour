@@ -9,6 +9,7 @@ class SequenceViewController: UIViewController {
         
         self.tour = tour
         
+        // Define text view to display sequence in
         textView = UITextView(frame: frame)
         textView.contentInset = UIEdgeInsetsMake(4, 4, 4, 4)
         textView.text = "\(tour)"

@@ -134,8 +134,6 @@ let parameters = PnPGeneticParameters(populationSize: populationSize,
                                    selection: selection,
                                    crossover: produceOffspring
 )
-
-
 /*:
  
  To visualize your custom Genetic Algorithm, a colourful map of the author's home country

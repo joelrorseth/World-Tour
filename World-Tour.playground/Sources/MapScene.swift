@@ -2,6 +2,8 @@ import SpriteKit
 
 public class MapScene: SKScene {
     
+    let pointsToKmFactor = 3.3
+    
     var background: SKSpriteNode!
     var cam: SKCameraNode!
     var markerNodes: [SKNode] = []
@@ -103,7 +105,7 @@ public class MapScene: SKScene {
     // Begin the genetic algorithm evolution process on user's points
     public func startGeneticAlgorithm() {
         
-        if markerNodes.count <= 2 { return }
+        if markerNodes.count < 2 { return }
         guard let parameters = simulationParameters else { return }
         
         // Update status on main queue
@@ -164,7 +166,7 @@ public class MapScene: SKScene {
         let touchPosition = convert(point, to: self.background)
         
         // Add the marker node at this location, but as child of background
-        let marker = SKShapeNode(circleOfRadius: 10)
+        let marker = SKShapeNode(circleOfRadius: 12)
         marker.position = touchPosition
         marker.fillColor = .red
         marker.strokeColor = .black
@@ -224,19 +226,18 @@ extension MapScene: SimulationDelegate {
             
             // Draw the sequence of cities defined by this Tour
             for i in 0..<numPaths {
-                
-                UIView.animate(withDuration: 5) {
-                    
-                    self.drawPathBetween(cityA: fittest.cities[i],
-                        cityB: fittest.cities[i+1], color: UIColor.red)
-                }
+                self.drawPathBetween(cityA: fittest.cities[i],
+                    cityB: fittest.cities[i+1], color: UIColor.red)
             }
             
             // Draw path between start city -> first city, last city -> start city
             self.drawPathBetween(cityA: fittest.cities.last!,
                 cityB: fittest.startCity, color: UIColor.red)
             
-            self.distanceTextView.text = "\(Int(fittest.totalDistance)) km"
+            self.distanceTextView.text =
+                "\(Int(fittest.totalDistance * self.pointsToKmFactor)) km"
+            
+            // Animate the nodes onto the screen
             self.animateNodes(self.pathNodes)
         }
     }
