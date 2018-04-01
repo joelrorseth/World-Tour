@@ -6,8 +6,9 @@
  the concept of genetic evolution and natural selection. Building on the concept of a random
  search, where solutions are randomly generated in an attempt to find an optimal solution,
  genetic algorithms evolve a set of potential solutions based on good solutions already found.
- The algorithm produces new sets of potential solutions, each time doing so, combining the
- best current solutions to form potentially better solutions in the next set.
+ The algorithm produces new generations of potential solutions, *each time doing so*,
+ combining the best current solutions to *form potentially better solutions in the next
+ generations*.
  
  */
 
@@ -71,10 +72,9 @@ let populationSize = 10
 // Select one Tour, with likelihood increasing proportional to fitness within population
 public func selection(population: Population, populationTotalDistance: Double) -> Tour {
     
-    // Use distance over all Tours to determine a given Tour's proportion!
-    //let populationTotalDistance = population.totalDistanceOverAllTours()
+    // Tip: Use distance over all Tours to determine a given Tour's proportion!
     
-    // Generate random number in [0,1]
+    // Generate random number in [0.0,1.0]
     let fitness = Double(arc4random()) / Double(UINT32_MAX)
     
     var currentFitness: Double = 0.0
@@ -189,14 +189,15 @@ let mutationRate = 1.5      // eg. 1.5% chance of mutation
  
  We have now completed the genetic algorithm for the TSP. In the live view to the right, a
  table is ready to run the GA with the functions and parameters you have specified. Upon
- evolution of each generation, an informational entry is inserted to summarize the Population
- at the specified generation. Select any generation to see more detail about its optimal
- Tour.
+ evolution of each generation, an informational entry is inserted to summarize the Population's
+ best Tour in the specified generation. Select any generation to see more detail about its
+ optimal Tour. A good genetic algorithm will evolve to be more fit (total distance will be
+ smaller) with each new generation! 👍
  
  - note:
  Due to the nature of Swift Playgrounds, only very small simulations will finish quickly.
  The [next](@next) page will present a compiled implementation, which will run faster and
- let you experiment in a fully interactive demonstration.
+ let you experiment in a scalable, fully interactive demonstration.
  
  */
 /*:
